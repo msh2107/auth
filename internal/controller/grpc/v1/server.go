@@ -2,25 +2,31 @@ package v1
 
 import (
 	"context"
+	"crypto/rand"
 	"fmt"
+	"log"
+	"math/big"
+	"strings"
+
 	"github.com/brianvoe/gofakeit"
-	desc "github.com/msh2107/auth/pkg/user_v1"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"log"
-	"math/rand"
-	"strings"
+
+	desc "github.com/msh2107/auth/pkg/user_v1"
 )
 
+// AuthServer -
 type AuthServer struct {
 	desc.UnimplementedUserV1Server
 }
 
+// NewAuthServer - .
 func NewAuthServer() *AuthServer {
 	return &AuthServer{}
 }
 
-func (s *AuthServer) Create(ctx context.Context, req *desc.CreateRequest) (*desc.CreateResponse, error) {
+// Create - .
+func (s *AuthServer) Create(_ context.Context, req *desc.CreateRequest) (*desc.CreateResponse, error) {
 	reqStr := fmt.Sprintf("Received Create:\n\tName: %v,\n\tEmail: %v,\n\tPassword: %v,\n\tPassword confirm: %v,\n\tRole: %v\n",
 		req.GetName(),
 		req.GetEmail(),
@@ -31,13 +37,20 @@ func (s *AuthServer) Create(ctx context.Context, req *desc.CreateRequest) (*desc
 
 	log.Println(reqStr)
 
-	id := rand.Int63()
+	randInt64, err := rand.Int(rand.Reader, new(big.Int).SetInt64(1<<62))
+	if err != nil {
+		return nil, err
+	}
+
+	id := randInt64.Int64()
 
 	return &desc.CreateResponse{
 		Id: id,
 	}, nil
 }
-func (s *AuthServer) Get(ctx context.Context, req *desc.GetRequest) (*desc.GetResponse, error) {
+
+// Get - .
+func (s *AuthServer) Get(_ context.Context, req *desc.GetRequest) (*desc.GetResponse, error) {
 	log.Printf("Received Get:\n\tId: %v\n", req.GetId())
 
 	role := gofakeit.RandString([]string{"ADMIN", "USER"})
@@ -63,7 +76,9 @@ func (s *AuthServer) Get(ctx context.Context, req *desc.GetRequest) (*desc.GetRe
 
 	return &resp, nil
 }
-func (s *AuthServer) Update(ctx context.Context, req *desc.UpdateRequest) (*emptypb.Empty, error) {
+
+// Update - .
+func (s *AuthServer) Update(_ context.Context, req *desc.UpdateRequest) (*emptypb.Empty, error) {
 
 	buf := strings.Builder{}
 	buf.WriteString("Received Update:\n")
@@ -85,7 +100,9 @@ func (s *AuthServer) Update(ctx context.Context, req *desc.UpdateRequest) (*empt
 	log.Println(buf.String())
 	return &emptypb.Empty{}, nil
 }
-func (s *AuthServer) Delete(ctx context.Context, req *desc.DeleteRequest) (*emptypb.Empty, error) {
+
+// Delete - .
+func (s *AuthServer) Delete(_ context.Context, req *desc.DeleteRequest) (*emptypb.Empty, error) {
 	log.Printf("Received Delete:\n\tId: %v", req.GetId())
 	return &emptypb.Empty{}, nil
 }

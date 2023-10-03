@@ -2,16 +2,18 @@ package main
 
 import (
 	"fmt"
-	"github.com/msh2107/auth/config"
-	v1 "github.com/msh2107/auth/internal/controller/grpc/v1"
-	desc "github.com/msh2107/auth/pkg/user_v1"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+
+	"github.com/msh2107/auth/config"
+	v1 "github.com/msh2107/auth/internal/controller/grpc/v1"
+	desc "github.com/msh2107/auth/pkg/user_v1"
 )
 
 func main() {
