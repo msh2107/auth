@@ -71,7 +71,8 @@ func (r *repo) Get(ctx context.Context, id int64) (*model.User, error) {
 func (r *repo) Update(ctx context.Context, id int64, info *model.UserInfo) error {
 	builderUpdate := sq.Update("\"user\"").
 		Where(sq.Eq{"id": id}).
-		PlaceholderFormat(sq.Dollar)
+		PlaceholderFormat(sq.Dollar).
+		Set("updated_at", time.Now())
 	if info.Name != "" {
 		builderUpdate = builderUpdate.Set("name", info.Name)
 	}
@@ -81,7 +82,6 @@ func (r *repo) Update(ctx context.Context, id int64, info *model.UserInfo) error
 	if info.Role != 0 {
 		builderUpdate = builderUpdate.Set("role", info.Role)
 	}
-	builderUpdate.Set("updated_at", time.Now())
 	query, args, err := builderUpdate.ToSql()
 	if err != nil {
 		return err
