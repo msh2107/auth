@@ -9,16 +9,18 @@ import (
 	"os/signal"
 	"syscall"
 
+	user3 "github.com/msh2107/auth/internal/api/user"
+	user2 "github.com/msh2107/auth/internal/service/user"
+
 	"github.com/jackc/pgx/v4/pgxpool"
 
 	"github.com/msh2107/auth/internal/config"
 	"github.com/msh2107/auth/internal/config/env"
-	"github.com/msh2107/auth/internal/repository/pg"
+	"github.com/msh2107/auth/internal/repository/user"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	v1 "github.com/msh2107/auth/internal/controller/grpc/v1"
 	desc "github.com/msh2107/auth/pkg/user_v1"
 )
 
@@ -59,12 +61,13 @@ func main() {
 	}
 	defer pool.Close()
 
-	repository := pg.NewUserRepository(pool)
+	repository := user.NewRepository(pool)
+	service := user2.NewService(repository)
 
+	imp := user3.NewImplementation(service)
 	s := grpc.NewServer()
 	reflection.Register(s)
-	authServer := v1.NewUserServer(repository)
-	desc.RegisterUserV1Server(s, authServer)
+	desc.RegisterUserV1Server(s, imp)
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
