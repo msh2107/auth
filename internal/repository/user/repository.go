@@ -2,11 +2,10 @@ package user
 
 import (
 	"context"
+	"github.com/msh2107/auth/internal/client/db"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx/v4/pgxpool"
-
 	"github.com/msh2107/auth/internal/repository"
 	"github.com/msh2107/auth/internal/repository/user/converter"
 	modelRepo "github.com/msh2107/auth/internal/repository/user/model"
@@ -16,12 +15,12 @@ import (
 
 // repo - .
 type repo struct {
-	pool *pgxpool.Pool
+	db db.Client
 }
 
 // NewRepository - .
-func NewRepository(pool *pgxpool.Pool) repository.UserRepository {
-	return &repo{pool: pool}
+func NewRepository(db db.Client) repository.UserRepository {
+	return &repo{db: db}
 }
 
 // Create - .
@@ -36,8 +35,13 @@ func (r *repo) Create(ctx context.Context, info *model.UserInfo) (int64, error) 
 		return 0, err
 	}
 
+	q := db.Query{
+		Name:     "user_repository.Create",
+		QueryRaw: query,
+	}
+
 	var id int64
-	err = r.pool.QueryRow(ctx, query, args...).Scan(&id)
+	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
@@ -58,8 +62,13 @@ func (r *repo) Get(ctx context.Context, id int64) (*model.User, error) {
 		return nil, err
 	}
 
+	q := db.Query{
+		Name:     "user_repository.Get",
+		QueryRaw: query,
+	}
+
 	var user modelRepo.User
-	err = r.pool.QueryRow(ctx, query, args...).Scan(&user.ID, &user.Info.Name, &user.Info.Email, &user.Info.Password, &user.Info.Role, &user.CreatedAt, &user.UpdatedAt)
+	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&user.ID, &user.Info.Name, &user.Info.Email, &user.Info.Password, &user.Info.Role, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -72,22 +81,22 @@ func (r *repo) Update(ctx context.Context, id int64, info *model.UserInfo) error
 	builderUpdate := sq.Update("\"user\"").
 		Where(sq.Eq{"id": id}).
 		PlaceholderFormat(sq.Dollar).
-		Set("updated_at", time.Now())
-	if info.Name != "" {
-		builderUpdate = builderUpdate.Set("name", info.Name)
-	}
-	if info.Email != "" {
-		builderUpdate = builderUpdate.Set("email", info.Email)
-	}
-	if info.Role != 0 {
-		builderUpdate = builderUpdate.Set("role", info.Role)
-	}
+		Set("updated_at", time.Now()).
+		Set("name", info.Name).
+		Set("email", info.Email).
+		Set("role", info.Role)
+
 	query, args, err := builderUpdate.ToSql()
 	if err != nil {
 		return err
 	}
 
-	_, err = r.pool.Exec(ctx, query, args...)
+	q := db.Query{
+		Name:     "user_repository.Update",
+		QueryRaw: query,
+	}
+
+	_, err = r.db.DB().ExecContext(ctx, q, args...)
 	if err != nil {
 		return err
 	}
@@ -104,7 +113,12 @@ func (r *repo) Delete(ctx context.Context, id int64) error {
 		return err
 	}
 
-	_, err = r.pool.Exec(ctx, query, args...)
+	q := db.Query{
+		Name:     "user_repository.Delete",
+		QueryRaw: query,
+	}
+
+	_, err = r.db.DB().ExecContext(ctx, q, args...)
 	if err != nil {
 		return err
 	}
