@@ -25,8 +25,7 @@ message UserInfo {
   string name = 1;
   string email = 2;
   string password = 3;
-  string password_confirm = 4;
-  Role role = 5;
+  Role role = 4;
 }
 
 message User {
@@ -40,8 +39,7 @@ message UpdateUserInfo {
   google.protobuf.StringValue name = 1;
   google.protobuf.StringValue email = 2;
   google.protobuf.StringValue password = 3;
-  google.protobuf.StringValue password_confirm = 4;
-  Role role = 5;
+  Role role = 4;
 }
 
 message CreateRequest {

@@ -3,7 +3,6 @@ package user
 import (
 	"context"
 	"errors"
-
 	"github.com/msh2107/auth/internal/model"
 )
 
@@ -29,7 +28,7 @@ func (s *serv) Update(ctx context.Context, id int64, info *model.UserInfo) error
 	})
 
 	if err != nil {
-		return errors.New("Service.Update: " + err.Error())
+		return err
 	}
 
 	return nil
