@@ -103,7 +103,7 @@ func TestCreate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			userRepo := tt.userRepositoryMock(mc)
 			txTrans := transaction.NewTransactionManager(tt.txTransactorMock(mc))
-			service := user.NewService(userRepo, txTrans)
+			service := user.NewUserService(userRepo, txTrans)
 			id, err := service.Create(tt.args.ctx, tt.args.req)
 			if err != nil {
 				return

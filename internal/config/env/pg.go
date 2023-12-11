@@ -9,22 +9,22 @@ const (
 	dsnEnvName = "PG_DSN"
 )
 
-// PGConfig - .
-type PGConfig struct {
+// pgConfig - .
+type pgConfig struct {
 	dsn string
 }
 
 // NewPGConfig - .
-func NewPGConfig() (*PGConfig, error) {
+func NewPGConfig() (*pgConfig, error) {
 	dsn := os.Getenv(dsnEnvName)
 	if len(dsn) == 0 {
 		return nil, errors.New("user dsn not found")
 	}
 
-	return &PGConfig{dsn: dsn}, nil
+	return &pgConfig{dsn: dsn}, nil
 }
 
 // DSN - .
-func (cfg PGConfig) DSN() string {
+func (cfg pgConfig) DSN() string {
 	return cfg.dsn
 }

@@ -11,12 +11,12 @@ type serv struct {
 	txManager      db.TxManager
 }
 
-// NewService - .
-func NewService(userRepository repository.UserRepository, txManager db.TxManager) service.UserService {
+// NewUserService - .
+func NewUserService(userRepository repository.UserRepository, txManager db.TxManager) service.UserService {
 	return &serv{userRepository: userRepository, txManager: txManager}
 }
 
-func NewMockService(deps ...interface{}) service.UserService {
+func NewMockUserService(deps ...interface{}) service.UserService {
 	srv := serv{}
 
 	for _, v := range deps {

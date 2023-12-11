@@ -94,7 +94,7 @@ func TestCreate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			userServiceMock := tt.userServiceMock(mc)
-			api := user.NewImplementation(userServiceMock)
+			api := user.NewUserImplementation(userServiceMock)
 
 			ID, err := api.Create(tt.args.ctx, tt.args.req)
 			require.Equal(t, tt.err, err)

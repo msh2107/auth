@@ -125,3 +125,29 @@ func (r *repo) Delete(ctx context.Context, id int64) error {
 
 	return nil
 }
+
+func (r *repo) GetByName(ctx context.Context, name string) (*model.User, error) {
+	builderSelectOne := sq.Select("id", "name", "email", "password", "role", "created_at", "updated_at").
+		From("\"user\"").
+		PlaceholderFormat(sq.Dollar).
+		Where(sq.Eq{"name": name}).
+		Limit(1)
+
+	query, args, err := builderSelectOne.ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	q := db.Query{
+		Name:     "user_repository.Get",
+		QueryRaw: query,
+	}
+
+	var user modelRepo.User
+	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&user.ID, &user.Info.Name, &user.Info.Email, &user.Info.Password, &user.Info.Role, &user.CreatedAt, &user.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	return converter.ToUserFromRepo(&user), nil
+}

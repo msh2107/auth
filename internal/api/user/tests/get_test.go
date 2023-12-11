@@ -112,7 +112,7 @@ func TestGet(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			userServiceMock := tt.userServiceMock(mc)
-			api := user.NewImplementation(userServiceMock)
+			api := user.NewUserImplementation(userServiceMock)
 
 			u, err := api.Get(tt.args.ctx, tt.args.req)
 			require.Equal(t, tt.want, u)

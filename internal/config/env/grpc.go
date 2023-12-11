@@ -11,14 +11,14 @@ const (
 	grpcPortEnvName = "GRPC_PORT"
 )
 
-// GRPCConfig - .
-type GRPCConfig struct {
+// grpcConfig - .
+type grpcConfig struct {
 	host string
 	port string
 }
 
 // NewGRPCConfig -.
-func NewGRPCConfig() (*GRPCConfig, error) {
+func NewGRPCConfig() (*grpcConfig, error) {
 	host := os.Getenv(grpcHostEnvName)
 	if len(host) == 0 {
 		return nil, errors.New("grpc port not found")
@@ -29,13 +29,13 @@ func NewGRPCConfig() (*GRPCConfig, error) {
 		return nil, errors.New("grpc port not found")
 	}
 
-	return &GRPCConfig{
+	return &grpcConfig{
 		host: host,
 		port: port,
 	}, nil
 }
 
 // Address - .
-func (cfg GRPCConfig) Address() string {
+func (cfg grpcConfig) Address() string {
 	return net.JoinHostPort(cfg.host, cfg.port)
 }

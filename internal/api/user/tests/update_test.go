@@ -97,7 +97,7 @@ func TestUpdate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			userServiceMock := tt.userServiceMock(mc)
-			api := user.NewImplementation(userServiceMock)
+			api := user.NewUserImplementation(userServiceMock)
 
 			empty, err := api.Update(tt.args.ctx, tt.args.req)
 			if err != nil {

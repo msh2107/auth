@@ -36,6 +36,12 @@ type UserRepositoryMock struct {
 	beforeGetCounter uint64
 	GetMock          mUserRepositoryMockGet
 
+	funcGetByName          func(ctx context.Context, name string) (up1 *model.User, err error)
+	inspectFuncGetByName   func(ctx context.Context, name string)
+	afterGetByNameCounter  uint64
+	beforeGetByNameCounter uint64
+	GetByNameMock          mUserRepositoryMockGetByName
+
 	funcUpdate          func(ctx context.Context, id int64, info *model.UserInfo) (err error)
 	inspectFuncUpdate   func(ctx context.Context, id int64, info *model.UserInfo)
 	afterUpdateCounter  uint64
@@ -58,6 +64,9 @@ func NewUserRepositoryMock(t minimock.Tester) *UserRepositoryMock {
 
 	m.GetMock = mUserRepositoryMockGet{mock: m}
 	m.GetMock.callArgs = []*UserRepositoryMockGetParams{}
+
+	m.GetByNameMock = mUserRepositoryMockGetByName{mock: m}
+	m.GetByNameMock.callArgs = []*UserRepositoryMockGetByNameParams{}
 
 	m.UpdateMock = mUserRepositoryMockUpdate{mock: m}
 	m.UpdateMock.callArgs = []*UserRepositoryMockUpdateParams{}
@@ -715,6 +724,223 @@ func (m *UserRepositoryMock) MinimockGetInspect() {
 	}
 }
 
+type mUserRepositoryMockGetByName struct {
+	mock               *UserRepositoryMock
+	defaultExpectation *UserRepositoryMockGetByNameExpectation
+	expectations       []*UserRepositoryMockGetByNameExpectation
+
+	callArgs []*UserRepositoryMockGetByNameParams
+	mutex    sync.RWMutex
+}
+
+// UserRepositoryMockGetByNameExpectation specifies expectation struct of the UserRepository.GetByName
+type UserRepositoryMockGetByNameExpectation struct {
+	mock    *UserRepositoryMock
+	params  *UserRepositoryMockGetByNameParams
+	results *UserRepositoryMockGetByNameResults
+	Counter uint64
+}
+
+// UserRepositoryMockGetByNameParams contains parameters of the UserRepository.GetByName
+type UserRepositoryMockGetByNameParams struct {
+	ctx  context.Context
+	name string
+}
+
+// UserRepositoryMockGetByNameResults contains results of the UserRepository.GetByName
+type UserRepositoryMockGetByNameResults struct {
+	up1 *model.User
+	err error
+}
+
+// Expect sets up expected params for UserRepository.GetByName
+func (mmGetByName *mUserRepositoryMockGetByName) Expect(ctx context.Context, name string) *mUserRepositoryMockGetByName {
+	if mmGetByName.mock.funcGetByName != nil {
+		mmGetByName.mock.t.Fatalf("UserRepositoryMock.GetByName mock is already set by Set")
+	}
+
+	if mmGetByName.defaultExpectation == nil {
+		mmGetByName.defaultExpectation = &UserRepositoryMockGetByNameExpectation{}
+	}
+
+	mmGetByName.defaultExpectation.params = &UserRepositoryMockGetByNameParams{ctx, name}
+	for _, e := range mmGetByName.expectations {
+		if minimock.Equal(e.params, mmGetByName.defaultExpectation.params) {
+			mmGetByName.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGetByName.defaultExpectation.params)
+		}
+	}
+
+	return mmGetByName
+}
+
+// Inspect accepts an inspector function that has same arguments as the UserRepository.GetByName
+func (mmGetByName *mUserRepositoryMockGetByName) Inspect(f func(ctx context.Context, name string)) *mUserRepositoryMockGetByName {
+	if mmGetByName.mock.inspectFuncGetByName != nil {
+		mmGetByName.mock.t.Fatalf("Inspect function is already set for UserRepositoryMock.GetByName")
+	}
+
+	mmGetByName.mock.inspectFuncGetByName = f
+
+	return mmGetByName
+}
+
+// Return sets up results that will be returned by UserRepository.GetByName
+func (mmGetByName *mUserRepositoryMockGetByName) Return(up1 *model.User, err error) *UserRepositoryMock {
+	if mmGetByName.mock.funcGetByName != nil {
+		mmGetByName.mock.t.Fatalf("UserRepositoryMock.GetByName mock is already set by Set")
+	}
+
+	if mmGetByName.defaultExpectation == nil {
+		mmGetByName.defaultExpectation = &UserRepositoryMockGetByNameExpectation{mock: mmGetByName.mock}
+	}
+	mmGetByName.defaultExpectation.results = &UserRepositoryMockGetByNameResults{up1, err}
+	return mmGetByName.mock
+}
+
+// Set uses given function f to mock the UserRepository.GetByName method
+func (mmGetByName *mUserRepositoryMockGetByName) Set(f func(ctx context.Context, name string) (up1 *model.User, err error)) *UserRepositoryMock {
+	if mmGetByName.defaultExpectation != nil {
+		mmGetByName.mock.t.Fatalf("Default expectation is already set for the UserRepository.GetByName method")
+	}
+
+	if len(mmGetByName.expectations) > 0 {
+		mmGetByName.mock.t.Fatalf("Some expectations are already set for the UserRepository.GetByName method")
+	}
+
+	mmGetByName.mock.funcGetByName = f
+	return mmGetByName.mock
+}
+
+// When sets expectation for the UserRepository.GetByName which will trigger the result defined by the following
+// Then helper
+func (mmGetByName *mUserRepositoryMockGetByName) When(ctx context.Context, name string) *UserRepositoryMockGetByNameExpectation {
+	if mmGetByName.mock.funcGetByName != nil {
+		mmGetByName.mock.t.Fatalf("UserRepositoryMock.GetByName mock is already set by Set")
+	}
+
+	expectation := &UserRepositoryMockGetByNameExpectation{
+		mock:   mmGetByName.mock,
+		params: &UserRepositoryMockGetByNameParams{ctx, name},
+	}
+	mmGetByName.expectations = append(mmGetByName.expectations, expectation)
+	return expectation
+}
+
+// Then sets up UserRepository.GetByName return parameters for the expectation previously defined by the When method
+func (e *UserRepositoryMockGetByNameExpectation) Then(up1 *model.User, err error) *UserRepositoryMock {
+	e.results = &UserRepositoryMockGetByNameResults{up1, err}
+	return e.mock
+}
+
+// GetByName implements repository.UserRepository
+func (mmGetByName *UserRepositoryMock) GetByName(ctx context.Context, name string) (up1 *model.User, err error) {
+	mm_atomic.AddUint64(&mmGetByName.beforeGetByNameCounter, 1)
+	defer mm_atomic.AddUint64(&mmGetByName.afterGetByNameCounter, 1)
+
+	if mmGetByName.inspectFuncGetByName != nil {
+		mmGetByName.inspectFuncGetByName(ctx, name)
+	}
+
+	mm_params := &UserRepositoryMockGetByNameParams{ctx, name}
+
+	// Record call args
+	mmGetByName.GetByNameMock.mutex.Lock()
+	mmGetByName.GetByNameMock.callArgs = append(mmGetByName.GetByNameMock.callArgs, mm_params)
+	mmGetByName.GetByNameMock.mutex.Unlock()
+
+	for _, e := range mmGetByName.GetByNameMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.up1, e.results.err
+		}
+	}
+
+	if mmGetByName.GetByNameMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmGetByName.GetByNameMock.defaultExpectation.Counter, 1)
+		mm_want := mmGetByName.GetByNameMock.defaultExpectation.params
+		mm_got := UserRepositoryMockGetByNameParams{ctx, name}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmGetByName.t.Errorf("UserRepositoryMock.GetByName got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmGetByName.GetByNameMock.defaultExpectation.results
+		if mm_results == nil {
+			mmGetByName.t.Fatal("No results are set for the UserRepositoryMock.GetByName")
+		}
+		return (*mm_results).up1, (*mm_results).err
+	}
+	if mmGetByName.funcGetByName != nil {
+		return mmGetByName.funcGetByName(ctx, name)
+	}
+	mmGetByName.t.Fatalf("Unexpected call to UserRepositoryMock.GetByName. %v %v", ctx, name)
+	return
+}
+
+// GetByNameAfterCounter returns a count of finished UserRepositoryMock.GetByName invocations
+func (mmGetByName *UserRepositoryMock) GetByNameAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetByName.afterGetByNameCounter)
+}
+
+// GetByNameBeforeCounter returns a count of UserRepositoryMock.GetByName invocations
+func (mmGetByName *UserRepositoryMock) GetByNameBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetByName.beforeGetByNameCounter)
+}
+
+// Calls returns a list of arguments used in each call to UserRepositoryMock.GetByName.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmGetByName *mUserRepositoryMockGetByName) Calls() []*UserRepositoryMockGetByNameParams {
+	mmGetByName.mutex.RLock()
+
+	argCopy := make([]*UserRepositoryMockGetByNameParams, len(mmGetByName.callArgs))
+	copy(argCopy, mmGetByName.callArgs)
+
+	mmGetByName.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockGetByNameDone returns true if the count of the GetByName invocations corresponds
+// the number of defined expectations
+func (m *UserRepositoryMock) MinimockGetByNameDone() bool {
+	for _, e := range m.GetByNameMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetByNameMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetByNameCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetByName != nil && mm_atomic.LoadUint64(&m.afterGetByNameCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockGetByNameInspect logs each unmet expectation
+func (m *UserRepositoryMock) MinimockGetByNameInspect() {
+	for _, e := range m.GetByNameMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to UserRepositoryMock.GetByName with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetByNameMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetByNameCounter) < 1 {
+		if m.GetByNameMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to UserRepositoryMock.GetByName")
+		} else {
+			m.t.Errorf("Expected call to UserRepositoryMock.GetByName with params: %#v", *m.GetByNameMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetByName != nil && mm_atomic.LoadUint64(&m.afterGetByNameCounter) < 1 {
+		m.t.Error("Expected call to UserRepositoryMock.GetByName")
+	}
+}
+
 type mUserRepositoryMockUpdate struct {
 	mock               *UserRepositoryMock
 	defaultExpectation *UserRepositoryMockUpdateExpectation
@@ -941,6 +1167,8 @@ func (m *UserRepositoryMock) MinimockFinish() {
 
 		m.MinimockGetInspect()
 
+		m.MinimockGetByNameInspect()
+
 		m.MinimockUpdateInspect()
 		m.t.FailNow()
 	}
@@ -968,5 +1196,6 @@ func (m *UserRepositoryMock) minimockDone() bool {
 		m.MinimockCreateDone() &&
 		m.MinimockDeleteDone() &&
 		m.MinimockGetDone() &&
+		m.MinimockGetByNameDone() &&
 		m.MinimockUpdateDone()
 }

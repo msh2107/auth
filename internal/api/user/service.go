@@ -11,7 +11,7 @@ type Implementation struct {
 	userService service.UserService
 }
 
-// NewImplementation - .
-func NewImplementation(userService service.UserService) *Implementation {
+// NewUserImplementation - .
+func NewUserImplementation(userService service.UserService) *Implementation {
 	return &Implementation{userService: userService}
 }

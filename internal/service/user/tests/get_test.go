@@ -94,7 +94,7 @@ func TestGet(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			userRepoMock := tt.userRepositoryMock(mc)
-			service := user.NewMockService(userRepoMock)
+			service := user.NewMockUserService(userRepoMock)
 
 			id, err := service.Get(tt.args.ctx, tt.args.req)
 			require.Equal(t, tt.err, err)

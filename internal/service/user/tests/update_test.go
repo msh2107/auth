@@ -128,7 +128,7 @@ func TestUpdate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			userRepo := tt.userRepositoryMock(mc)
 			txTrans := transaction.NewTransactionManager(tt.txTransactorMock(mc))
-			service := user.NewService(userRepo, txTrans)
+			service := user.NewUserService(userRepo, txTrans)
 			err := service.Update(tt.args.ctx, tt.args.req.id, tt.args.req.info)
 
 			require.ErrorIs(t, err, tt.err)

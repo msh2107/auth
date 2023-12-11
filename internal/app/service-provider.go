@@ -97,7 +97,7 @@ func (s *serviceProvider) UserRepository(ctx context.Context) repository.UserRep
 
 func (s *serviceProvider) UserService(ctx context.Context) service.UserService {
 	if s.userService == nil {
-		s.userService = userService.NewService(s.UserRepository(ctx), s.TxManager(ctx))
+		s.userService = userService.NewUserService(s.UserRepository(ctx), s.TxManager(ctx))
 	}
 
 	return s.userService
@@ -105,7 +105,7 @@ func (s *serviceProvider) UserService(ctx context.Context) service.UserService {
 
 func (s *serviceProvider) UserImpl(ctx context.Context) *user.Implementation {
 	if s.userImpl == nil {
-		s.userImpl = user.NewImplementation(s.UserService(ctx))
+		s.userImpl = user.NewUserImplementation(s.UserService(ctx))
 	}
 
 	return s.userImpl
